@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftShip | Dark Mode Orders</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #020617; font-family: 'Inter', sans-serif; color: #f8fafc; }
+        .nav-gradient { background: linear-gradient(135deg, #0f172a 0%, #020617 100%); border-bottom: 1px solid #1e293b; }
+        .order-card { background-color: #0f172a; border: 1px solid #1e293b; transition: 0.3s; }
+        .order-card:hover { border-color: #06b6d4; box-shadow: 0 0 15px rgba(6, 182, 212, 0.1); }
+        .btn-cyan { background: #06b6d4; color: #020617; transition: 0.3s; }
+        .btn-cyan:hover { background: #22d3ee; transform: scale(1.02); }
+        .pagination-active { background: #06b6d4; color: #020617; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <header class="nav-gradient p-5 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-black tracking-tighter text-cyan-500 italic">SWIFT<span class="text-white">SHIP.</span></h1>
+            <div class="flex items-center gap-4">
+                <div class="h-8 w-8 bg-cyan-500/20 rounded-full border border-cyan-500/50 flex items-center justify-center text-cyan-500 text-xs font-bold">RG</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-6">
+        <div class="flex items-center justify-between mb-8 border-b border-slate-800 pb-4">
+            <h2 class="text-2xl font-bold">Your Command Center</h2>
+            <span class="text-cyan-500 text-xs font-mono uppercase tracking-widest">30 Records Found</span>
+        </div>
+
+        <div id="orders-container" class="space-y-4"></div>
+
+        <div class="flex justify-center items-center gap-3 mt-12 mb-10">
+            <button id="prevBtn" class="px-4 py-2 rounded-lg border border-slate-700 bg-slate-900 text-slate-400 disabled:opacity-30" onclick="changePage(currentPage - 1)">Prev</button>
+            <div id="pageNumbers" class="flex gap-2"></div>
+            <button id="nextBtn" class="px-4 py-2 rounded-lg border border-slate-700 bg-slate-900 text-slate-400 disabled:opacity-30" onclick="changePage(currentPage + 1)">Next</button>
+        </div>
+    </main>
+
+    <script>
+        const boxImg = "https://cdn-icons-png.flaticon.com/512/679/679821.png";
+        const products = ["Cyber Dynamics Pack", "Neon Tech Kit", "Void Lifestyle Box", "Prism Essentials", "Onyx Delivery"];
+        const allOrders = [];
+
+        for (let i = 1; i <= 30; i++) {
+            allOrders.push({
+                id: `SS-DARK-${500 + i}`,
+                date: `${(i % 28) + 1} Jan 2026`,
+                name: products[i % products.length],
+                price: (Math.random() * 5000 + 999).toFixed(2)
+            });
+        }
+
+        let currentPage = 1;
+        const perPage = 10;
+
+        function displayOrders(page) {
+            const container = document.getElementById('orders-container');
+            container.innerHTML = "";
+            const start = (page - 1) * perPage;
+            const data = allOrders.slice(start, start + perPage);
+
+            data.forEach(order => {
+                container.innerHTML += `
+                <div class="rounded-2xl order-card p-6 flex items-center gap-6">
+                    <div class="w-16 h-16 bg-slate-950 rounded-xl flex items-center justify-center border border-slate-800">
+                        <img src="${boxImg}" class="w-10 h-10 invert opacity-60" alt="Box">
+                    </div>
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-[10px] font-bold text-cyan-500 uppercase tracking-widest mb-1">${order.id}</p>
+                                <h3 class="font-bold text-slate-100 text-lg">${order.name}</h3>
+                                <p class="text-xs text-slate-500 italic">Processing: ${order.date}</p>
+                            </div>
+                            <p class="font-mono text-cyan-400">₹${order.price}</p>
+                        </div>
+                        <div class="mt-5">
+                            <a href="Delivery2.html" class="btn-cyan px-6 py-2 rounded-full text-xs font-black uppercase tracking-tighter inline-block shadow-lg shadow-cyan-500/10">Track Pulse</a>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            updateUI();
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        function updateUI() {
+            document.getElementById('prevBtn').disabled = (currentPage === 1);
+            document.getElementById('nextBtn').disabled = (currentPage === 3);
+            const p = document.getElementById('pageNumbers');
+            p.innerHTML = "";
+            for(let i=1; i<=3; i++) {
+                p.innerHTML += `<button onclick="changePage(${i})" class="w-10 h-10 rounded-lg border border-slate-700 ${i===currentPage ? 'pagination-active' : 'bg-slate-900 text-slate-400'}">${i}</button>`;
+            }
+        }
+
+        function changePage(page) { if(page>=1 && page<=3) { currentPage=page; displayOrders(page); } }
+        displayOrders(1);
+    </script>
+</body>
+</html>
