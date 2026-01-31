@@ -5,7 +5,7 @@ import os
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
-@app.route('/health')
+@app.route('/')
 def home():
     return jsonify({
         "status": "online",
@@ -13,7 +13,7 @@ def home():
         "version": "1.0.0"
     })
 
-@app.route('/health')
+@app.route('/health', methods=['GET', 'HEAD'])
 def health():
     return jsonify({"status": "healthy"}), 200
 
