@@ -22,13 +22,15 @@ def inventory():
     
     total_inventory_value = sum(item['stock'] * item['cost'] for item in inventory_items)
     ordered_items_count = 12 # Mock
-    low_stock_count = len([item for item in inventory_items if item['stock'] < 10])
+    low_stock_items = [item for item in inventory_items if item['stock'] < 10]
+    low_stock_count = len(low_stock_items)
     total_skus = len(inventory_items)
     
     total_pages = (len(inventory_items) + per_page - 1) // per_page
     
     return render_template('inventory.html', 
                            items=paginated_items, 
+                           low_stock_items=low_stock_items,
                            page=page, 
                            total_pages=total_pages,
                            total_value=f"₹{total_inventory_value:,}",

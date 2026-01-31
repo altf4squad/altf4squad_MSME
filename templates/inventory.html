@@ -15,15 +15,10 @@
         <div class="value">{{ ordered }}</div>
         <div class="trend" style="color: #6366f1;">Processing 4 shipments</div>
     </div>
-    <div class="kpi-card">
+    <div class="kpi-card" id="lowStockCard">
         <h3>Low Stock Alerts</h3>
         <div class="value" style="color: #f59e0b;">{{ low_stock }}</div>
-        <div class="trend" style="color: #f59e0b;">Action required for 3 items</div>
-    </div>
-    <div class="kpi-card">
-        <h3>Total SKUs</h3>
-        <div class="value">{{ skus }}</div>
-        <div class="trend" style="color: #94a3b8;">Active across 2 warehouses</div>
+        <div class="trend" style="color: #f59e0b;">Action required for {{ low_stock }} items</div>
     </div>
 </div>
 
@@ -88,4 +83,75 @@
         Your capital turnover is healthy, but 12% of stock has been static for over 30 days.
     </p>
 </div>
+
+<!-- Low Stock Modal -->
+<div id="lowStockModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Critical Low Stock Items (Agentic Analysis)</h2>
+            <span class="close-btn">&times;</span>
+        </div>
+        <div class="modal-body">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Stock</th>
+                        <th>Recommended Action</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in low_stock_items %}
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td style="color: #f59e0b;">{{ item.stock }}</td>
+                        <td style="color: var(--text-muted); font-size: 0.85rem;">Drafting supplier request for 50 units
+                        </td>
+                        <td><button class="action-btn email-trigger">Send Email</button></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="modal-footer">
+            <button class="action-btn email-trigger">Send All Drafts</button>
+        </div>
+    </div>
+</div>
+
+<div id="flashOverlay" class="flash-overlay">
+    <i class="fas fa-check-circle"></i> Email Sent Successfully!
+</div>
+
+<script>
+    const modal = document.getElementById("lowStockModal");
+    const card = document.getElementById("lowStockCard");
+    const closeBtn = document.getElementsByClassName("close-btn")[0];
+    const flash = document.getElementById("flashOverlay");
+
+    card.onclick = function () {
+        modal.style.display = "flex";
+    }
+
+    closeBtn.onclick = function () {
+        modal.style.display = "none";
+    }
+
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    document.querySelectorAll('.email-trigger').forEach(btn => {
+        btn.onclick = function () {
+            modal.style.display = "none";
+            flash.style.display = "block";
+            setTimeout(() => {
+                flash.style.display = "none";
+            }, 3000);
+        }
+    });
+</script>
 {% endblock %}
