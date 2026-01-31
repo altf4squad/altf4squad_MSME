@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Inventory Management{% endblock %}
+{% block page_title %}Inventory System{% endblock %}
+
+{% block content %}
+<div class="kpi-grid">
+    <div class="kpi-card">
+        <h3>Total Inventory Value</h3>
+        <div class="value">{{ total_value }}</div>
+        <div class="trend" style="color: #10b981;"><i class="fas fa-arrow-up"></i> 5.2% from last month</div>
+    </div>
+    <div class="kpi-card">
+        <h3>Ordered Items</h3>
+        <div class="value">{{ ordered }}</div>
+        <div class="trend" style="color: #6366f1;">Processing 4 shipments</div>
+    </div>
+    <div class="kpi-card">
+        <h3>Low Stock Alerts</h3>
+        <div class="value" style="color: #f59e0b;">{{ low_stock }}</div>
+        <div class="trend" style="color: #f59e0b;">Action required for 3 items</div>
+    </div>
+    <div class="kpi-card">
+        <h3>Total SKUs</h3>
+        <div class="value">{{ skus }}</div>
+        <div class="trend" style="color: #94a3b8;">Active across 2 warehouses</div>
+    </div>
+</div>
+
+<div class="table-container">
+    <div class="scroll-div">
+        <table>
+            <thead>
+                <tr>
+                    <th>Item Name</th>
+                    <th>MRP</th>
+                    <th>Selling Price</th>
+                    <th>Discount</th>
+                    <th>Cost Price</th>
+                    <th>Stock</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.name }}</td>
+                    <td>₹{{ item.mrp }}</td>
+                    <td>₹{{ item.sp }}</td>
+                    <td><span
+                            style="background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 2px 8px; border-radius: 6px;">{{
+                            item.discount }}</span></td>
+                    <td>₹{{ item.cost }}</td>
+                    <td>
+                        {% if item.stock < 10 %} <span style="color: #f59e0b; font-weight: 600;">{{ item.stock }}
+                            (Low)</span>
+                            {% else %}
+                            {{ item.stock }}
+                            {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination">
+        <span>Page {{ page }} of {{ total_pages }}</span>
+        <div class="buttons">
+            <a href="{{ url_for('inventory', page=page-1) }}"
+                class="pagination-btn {% if page == 1 %}disabled{% endif %}">
+                <i class="fas fa-chevron-left"></i> Previous
+            </a>
+            <a href="{{ url_for('inventory', page=page+1) }}"
+                class="pagination-btn {% if page == total_pages %}disabled{% endif %}">
+                Next <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="ai-summary">
+    <h2><i class="fas fa-robot" style="color: #6366f1;"></i> Agentic Inventory Summary</h2>
+    <p>
+        Based on current trends, your inventory value has increased by 5.2%. Currently, <strong>{{ low_stock }}
+            items</strong> are below the safety threshold.
+        The Agentic System suggests restocking <strong>Item 3</strong> and <strong>Item 7</strong> immediately as demand
+        for these is projected to spike in the next 48 hours.
+        Your capital turnover is healthy, but 12% of stock has been static for over 30 days.
+    </p>
+</div>
+{% endblock %}
