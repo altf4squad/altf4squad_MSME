@@ -24,7 +24,6 @@ def inventory():
     ordered_items_count = 12 # Mock
     low_stock_items = [item for item in inventory_items if item['stock'] < 10]
     low_stock_count = len(low_stock_items)
-    total_skus = len(inventory_items)
     
     total_pages = (len(inventory_items) + per_page - 1) // per_page
     
@@ -35,8 +34,7 @@ def inventory():
                            total_pages=total_pages,
                            total_value=f"₹{total_inventory_value:,}",
                            ordered=ordered_items_count,
-                           low_stock=low_stock_count,
-                           skus=total_skus)
+                           low_stock=low_stock_count)
 
 @app.route('/reports')
 def reports():
