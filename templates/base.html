@@ -27,9 +27,8 @@
                     <li><a href="{{ url_for('inventory') }}"
                             class="{% if request.endpoint == 'inventory' %}active{% endif %}"><i
                                 class="fas fa-boxes-stacked"></i> Inventory</a></li>
-                    <li><a href="{{ url_for('reports') }}"
-                            class="{% if request.endpoint == 'reports' %}active{% endif %}"><i
-                                class="fas fa-file-invoice-dollar"></i> Reports</a></li>
+                    <li><a href="http://127.0.0.1:5001" target="_blank"><i class="fas fa-file-invoice-dollar"></i>
+                            Reports</a></li>
                     <li><a href="{{ url_for('orders') }}"
                             class="{% if request.endpoint == 'orders' %}active{% endif %}"><i
                                 class="fas fa-cart-shopping"></i> Orders</a></li>
