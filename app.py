@@ -196,7 +196,80 @@ def autonomous_reports_watcher():
 
 @app.route('/')
 def dashboard():
-    return render_template('dashboard.html')
+    if not os.path.exists(DB_NAME): init_db()
+    conn = get_db()
+    
+    # KPIs
+    all_items = conn.execute('SELECT * FROM inventory').fetchall()
+    total_val = sum(item['stock'] * item['cost'] for item in all_items)
+    low_stock = len([i for i in all_items if i['stock'] < i['min_limit']])
+    total_items = len(all_items)
+    
+    insights = conn.execute('SELECT * FROM whatsapp_insights').fetchall()
+    pot_rev = sum(i['revenue'] for i in insights if i['revenue'])
+    
+    # Chart Data
+    # 1. Stock Levels (Top 5 by Value)
+    sorted_items = sorted(all_items, key=lambda x: x['stock'] * x['cost'], reverse=True)[:5]
+    chart_labels = [i['name'] for i in sorted_items]
+    chart_stock = [i['stock'] for i in sorted_items]
+    chart_value = [i['stock'] * i['cost'] for i in sorted_items]
+    
+    # 2. Sentiment Donut
+    pos = len([i for i in insights if i['sentiment'] == 'Positive'])
+    neu = len([i for i in insights if i['sentiment'] == 'Neutral'])
+    neg = len([i for i in insights if i['sentiment'] == 'Negative'])
+    
+    conn.close()
+    return render_template('dashboard.html', 
+                           total_val=f"₹{total_val:,.2f}", 
+                           low_stock=low_stock,
+                           pot_rev=f"₹{pot_rev:,.2f}",
+                           total_items=total_items,
+                           chart_labels=chart_labels,
+                           chart_stock=chart_stock,
+                           chart_value=chart_value,
+                           sentiment_data=[pos, neu, neg])
+
+@app.route('/ai-query', methods=['POST'])
+def ai_query():
+    data = request.json
+    query = data.get('query')
+    if not query: return jsonify({"answer": "Please ask something!"})
+    
+    conn = get_db()
+    items = conn.execute('SELECT name, stock, cost, min_limit FROM inventory').fetchall()
+    insights = conn.execute('SELECT summary, sentiment, revenue FROM whatsapp_insights').fetchall()
+    conn.close()
+    
+    # Convert data to context
+    data_context = "Inventory:\n"
+    for i in items:
+        data_context += f"- {i['name']}: {i['stock']} units, Cost: ₹{i['cost']}\n"
+    
+    data_context += "\nInsights:\n"
+    for ins in insights:
+        data_context += f"- {ins['summary']} (Sentiment: {ins['sentiment']}, Potential: ₹{ins['revenue']})\n"
+
+    prompt = f"""
+    You are a Data Analyst AI for an MSME. Answer user questions DIRECTLY using provided data.
+    IMPORTANT: Give ONLY the final answer. No "The answer is...", no preamble, no conversation.
+    If they ask for a list, use bullets. If it's a number, just give the number.
+    
+    DATA:
+    {data_context}
+
+    USER QUESTION: {query}
+    """
+    
+    try:
+        completion = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+        )
+        return jsonify({"answer": completion.choices[0].message.content.strip()})
+    except:
+        return jsonify({"answer": "Bhai, AI server is busy!"})
 
 @app.route('/inventory')
 def inventory():
