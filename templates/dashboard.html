@@ -1,0 +1,366 @@
+{% extends 'base.html' %}
+{% block title %}Agentic Dashboard{% endblock %}
+{% block page_title %}Advanced Business Intelligence{% endblock %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .kpi-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        padding: 1.5rem;
+        border-radius: 20px;
+        text-align: left;
+        transition: 0.3s;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .kpi-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--primary);
+    }
+
+    .kpi-card i {
+        position: absolute;
+        right: -10px;
+        bottom: -10px;
+        font-size: 4rem;
+        opacity: 0.05;
+        color: white;
+    }
+
+    .kpi-label {
+        font-size: 10px;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        letter-spacing: 1px;
+        font-weight: 700;
+    }
+
+    .kpi-value {
+        font-size: 1.75rem;
+        font-weight: 800;
+        margin-top: 5px;
+        display: block;
+    }
+
+    .charts-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .chart-box {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        padding: 2rem;
+        border-radius: 24px;
+        min-height: 400px;
+        backdrop-filter: blur(5px);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chart-wrapper {
+        flex: 1;
+        position: relative;
+    }
+
+    .chart-box h3 {
+        margin-bottom: 1.5rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-main);
+    }
+
+    .ai-analyst-section {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
+        border: 1px solid var(--primary);
+        border-radius: 24px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .analyst-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .analyst-input-group {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .analyst-input {
+        flex: 1;
+        background: #0f172a;
+        border: 1px solid #334155;
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        color: white;
+        font-family: 'Outfit', sans-serif;
+        font-size: 1rem;
+        outline: none;
+        transition: 0.3s;
+    }
+
+    .analyst-input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+    }
+
+    .analyst-btn {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 0 2rem;
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .analyst-btn:hover {
+        background: var(--primary-hover);
+        transform: scale(1.02);
+    }
+
+    .analyst-response {
+        margin-top: 1.5rem;
+        padding: 1.5rem;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 12px;
+        border-left: 4px solid var(--primary);
+        display: none;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        color: #e2e8f0;
+        animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .text-indigo-400 {
+        color: #818cf8;
+    }
+
+    .text-rose-400 {
+        color: #fb7185;
+    }
+
+    .text-emerald-400 {
+        color: #34d399;
+    }
+</style>
+
+<div class="dashboard-grid">
+    <div class="kpi-card shadow-lg">
+        <span class="kpi-label">Total Inventory Value</span>
+        <span class="kpi-value text-indigo-400">{{ total_val }}</span>
+        <i class="fas fa-wallet"></i>
+    </div>
+    <div class="kpi-card shadow-lg">
+        <span class="kpi-label">Low Stock Alerts</span>
+        <span class="kpi-value text-rose-400">{{ low_stock }}</span>
+        <i class="fas fa-triangle-exclamation"></i>
+    </div>
+    <div class="kpi-card shadow-lg">
+        <span class="kpi-label">Revenue Potential</span>
+        <span class="kpi-value text-emerald-400">{{ pot_rev }}</span>
+        <i class="fas fa-chart-line"></i>
+    </div>
+    <div class="kpi-card shadow-lg">
+        <span class="kpi-label">Active SKUs</span>
+        <span class="kpi-value">{{ total_items }}</span>
+        <i class="fas fa-tag"></i>
+    </div>
+</div>
+
+<div class="charts-container">
+    <div class="chart-box shadow-xl">
+        <h3>Live Inventory Valuation (Top 5 SKUs)</h3>
+        <div class="chart-wrapper">
+            <canvas id="stockChart"></canvas>
+        </div>
+    </div>
+    <div class="chart-box shadow-xl">
+        <h3>WhatsApp Sentiment Distribution</h3>
+        <div class="chart-wrapper">
+            <canvas id="sentimentChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="ai-analyst-section shadow-2xl">
+    <div class="analyst-header">
+        <div
+            style="background: var(--primary); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);">
+            <i class="fas fa-robot" style="color: white; font-size: 1.5rem;"></i>
+        </div>
+        <div>
+            <h2
+                style="margin: 0; font-size: 1.5rem; background: linear-gradient(135deg, #fff, #94a3b8); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
+                Agentic Data Analyst</h2>
+            <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">Powered by Groq Llama-3 Analysis Engine
+            </p>
+        </div>
+    </div>
+
+    <div class="analyst-input-group">
+        <input type="text" id="queryInput" class="analyst-input"
+            placeholder="e.g., Which item is most expensive? or Give me a summary of my low stock items.">
+        <button onclick="askAI()" id="askBtn" class="analyst-btn">ASK ANALYST</button>
+    </div>
+
+    <div id="aiResponse" class="analyst-response"></div>
+</div>
+
+<script>
+    // --- Chart Implementations ---
+    Chart.defaults.color = '#94a3b8';
+    Chart.defaults.font.family = 'Outfit';
+
+    // Stock Valuation Bar Chart
+    const stockCtx = document.getElementById('stockChart').getContext('2d');
+    if (stockCtx) {
+        new Chart(stockCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ chart_labels | tojson | safe }},
+    datasets: [{
+        label: 'Asset Value (INR)',
+        data: {{ chart_value | tojson | safe }},
+        backgroundColor: 'rgba(99, 102, 241, 0.4)',
+        borderColor: '#6366f1',
+        borderWidth: 2,
+        borderRadius: 10,
+        hoverBackgroundColor: 'rgba(99, 102, 241, 0.7)'
+                }]
+            },
+    options: {
+        responsive: true,
+            maintainAspectRatio: false,
+                scales: {
+            y: {
+                beginAtZero: true,
+                    grid: { color: 'rgba(255,255,255,0.05)' },
+                ticks: { color: '#94a3b8' }
+            },
+            x: {
+                grid: { display: false },
+                ticks: { color: '#94a3b8' }
+            }
+        },
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#1e293b',
+                    titleColor: '#fff',
+                        bodyColor: '#fff',
+                            cornerRadius: 8
+            }
+        }
+    }
+        });
+    }
+
+    // WhatsApp Sentiment Donut Chart
+    const sentimentCtx = document.getElementById('sentimentChart').getContext('2d');
+    if (sentimentCtx) {
+        new Chart(sentimentCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Positive', 'Neutral', 'Negative'],
+                datasets: [{
+                    data: {{ sentiment_data | tojson | safe }},
+                    backgroundColor: ['#10b981', '#94a3b8', '#ef4444'],
+                    borderWidth: 0,
+                    hoverOffset: 15
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#94a3b8', padding: 25, font: { size: 12 } }
+                    },
+                    tooltip: { backgroundColor: '#1e293b', padding: 12 }
+                },
+                cutout: '70%'
+            }
+        });
+    }
+
+    // --- AI Analyst Terminal Logic ---
+    const queryInput = document.getElementById('queryInput');
+    if (queryInput) {
+        queryInput.addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
+                askAI();
+            }
+        });
+    }
+
+    function askAI() {
+        const queryInput = document.getElementById('queryInput');
+        const query = queryInput.value.trim();
+        const btn = document.getElementById('askBtn');
+        const resDiv = document.getElementById('aiResponse');
+
+        if (!query) return;
+
+        // UI Feedback
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ANALYZING...';
+        resDiv.style.display = "block";
+        resDiv.style.opacity = "0.5";
+        resDiv.innerHTML = "Agent is scanning database and analyzing insights...";
+
+        fetch('/ai-query', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query: query })
+        })
+            .then(response => response.json())
+            .then(data => {
+                resDiv.style.opacity = "1";
+                resDiv.innerHTML = data.answer;
+                btn.disabled = false;
+                btn.innerHTML = 'ASK ANALYST';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resDiv.innerHTML = "Bhai, connection error! Check server status.";
+                btn.disabled = false;
+                btn.innerHTML = 'ASK ANALYST';
+            });
+    }
+</script>
+{% endblock %}

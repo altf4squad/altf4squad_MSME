@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+{% block title %}Agentic Reports{% endblock %}
+{% block page_title %}Business Intelligence & WhatsApp Insights{% endblock %}
+
+{% block content %}
+<style>
+    .reports-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+    }
+
+    .sync-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        padding: 2rem;
+        border-radius: 24px;
+        margin-bottom: 2rem;
+    }
+
+    .chat-input {
+        width: 100%;
+        background: #0f172a;
+        border: 1px solid #334155;
+        border-radius: 16px;
+        padding: 1.5rem;
+        color: white;
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.9rem;
+        height: 150px;
+        resize: none;
+        margin-bottom: 1rem;
+    }
+
+    .sync-btn {
+        background: linear-gradient(135deg, #6366f1, #a855f7);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: 0.3s;
+    }
+
+    .sync-btn:hover {
+        transform: scale(1.02);
+        box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .insight-card {
+        background: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .insight-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+    }
+
+    .insight-card.Positive::before {
+        background: #10b981;
+    }
+
+    .insight-card.Neutral::before {
+        background: #94a3b8;
+    }
+
+    .insight-card.Negative::before {
+        background: #ef4444;
+    }
+
+    .insight-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .sentiment-tag {
+        font-size: 10px;
+        text-transform: uppercase;
+        font-weight: 800;
+        letter-spacing: 1px;
+        padding: 4px 10px;
+        border-radius: 20px;
+    }
+
+    .Positive .sentiment-tag {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+    }
+
+    .Neutral .sentiment-tag {
+        background: rgba(148, 163, 184, 0.1);
+        color: #94a3b8;
+    }
+
+    .Negative .sentiment-tag {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+    }
+
+    .revenue-highlight {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #10b981;
+    }
+
+    .data-pill {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 4px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        margin-right: 8px;
+        margin-top: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stats-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .stat-box {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        padding: 1.5rem;
+        border-radius: 20px;
+        text-align: center;
+    }
+
+    .stat-box .val {
+        font-size: 2rem;
+        font-weight: 800;
+        display: block;
+        margin-top: 5px;
+    }
+</style>
+
+<div class="reports-grid">
+    <div class="main-column">
+        <div class="sync-card shadow-2xl">
+            <h2 style="margin-bottom: 1rem;"><i class="fab fa-whatsapp" style="color: #25d366;"></i> WhatsApp Agentic
+                Sync</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                Paste your raw WhatsApp chat exports here. Our Agentic AI will analyze interactions, extract leads, and
+                identify revenue opportunities.
+            </p>
+            <textarea id="chatLog" class="chat-input"
+                placeholder="Example: [10:30, 01/02/2026] Customer: Hi, I want to order 500 units of Item A. How much is it?"></textarea>
+            <button onclick="syncWhatsApp()" id="syncBtn" class="sync-btn">
+                <i class="fas fa-magic"></i> ANALYZE INTERACTION
+            </button>
+        </div>
+
+        <div id="insights-feed">
+            <h3
+                style="margin-bottom: 1.5rem; text-transform: uppercase; font-size: 12px; letter-spacing: 2px; color: var(--text-muted);">
+                Extracted Agentic Insights</h3>
+            {% if insights %}
+            {% for i in insights %}
+            {% set data = i.processed_json | from_json %}
+            <div class="insight-card {{ i.sentiment }} shadow-lg">
+                <div class="insight-header">
+                    <span class="sentiment-tag">{{ i.sentiment }} Sentiment</span>
+                    <span class="revenue-highlight">₹{{ i.revenue }} potential</span>
+                </div>
+                <p style="font-weight: 600; font-size: 1.1rem; margin-bottom: 1rem; color: white;">{{ i.summary }}</p>
+
+                <div style="margin-top: 1rem;">
+                    <strong style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Identified
+                        Leads:</strong><br>
+                    {% for lead in data.leads %}
+                    <span class="data-pill"><i class="fas fa-user-tag" style="color: #6366f1; margin-right: 5px;"></i>
+                        {{ lead }}</span>
+                    {% endfor %}
+                </div>
+
+                <div style="margin-top: 1rem;">
+                    <strong style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Urgent
+                        Tasks:</strong><br>
+                    {% for task in data.urgent_tasks %}
+                    <span class="data-pill" style="border-color: rgba(239, 68, 68, 0.3); color: #fda4af;">! {{ task
+                        }}</span>
+                    {% endfor %}
+                </div>
+
+                <div style="margin-top: 1.5rem; text-align: right;">
+                    <span style="font-size: 10px; color: var(--text-muted);">Analyzed on {{ i.timestamp }}</span>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div
+                style="text-align: center; padding: 40px; background: rgba(255,255,255,0.02); border-radius: 20px; border: 1px dashed var(--border);">
+                <i class="fas fa-robot" style="font-size: 3rem; color: #334155; margin-bottom: 1rem;"></i>
+                <p>No insights generated yet. Start by syncing a WhatsApp chat.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="stats-column">
+        <div class="stats-container">
+            <div class="stat-box">
+                <span style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Total Potential
+                    Revenue</span>
+                <span class="val" style="color: #10b981;">₹{{ total_revenue }}</span>
+            </div>
+            <div class="stat-box">
+                <span style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Positive
+                    Interactions</span>
+                <span class="val" style="color: #6366f1;">{{ pos_count }}</span>
+            </div>
+            <div class="stat-box" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), transparent);">
+                <span style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Agent
+                    Performance</span>
+                <span class="val">98.4%</span>
+                <p style="font-size: 10px; color: var(--text-muted); margin-top: 10px;">Accuracy in Insight Extraction
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="flashOverlay" class="flash-overlay">
+    <i class="fas fa-check-circle"></i> Chat Analyzed Successfully!
+</div>
+
+<script>
+    const flash = document.getElementById("flashOverlay");
+
+    function syncWhatsApp() {
+        const chatLog = document.getElementById('chatLog').value;
+        const btn = document.getElementById('syncBtn');
+
+        if (!chatLog) return;
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ANALYZING...';
+
+        const formData = new FormData();
+        formData.append('chat_log', chatLog);
+
+        fetch('/process-whatsapp', {
+            method: 'POST',
+            body: formData
+        })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    flash.style.display = "block";
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    alert("Analysis failed. Check your API key or connection.");
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-magic"></i> ANALYZE INTERACTION';
+                }
+            });
+    }
+</script>
+{% endblock %}
