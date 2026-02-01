@@ -1,17 +1,17 @@
-item,stock,price,min_limit
-Cotton Blue Fabric,15,200.0,100
-Denim Raw,8,450.0,50
-Silk Thread Red,200,50.0,100
-Zippers YKK 8inch,45,12.0,500
-Buttons Wood 12mm,5000,1.5,1000
-Elastic 1inch,12,30.0,100
-Polyester Thread,80,45.0,200
-Velcro Black,25,60.0,150
-Lace White 2mtr,300,120.0,100
-Rivets Copper,150,5.0,1000
-Leather Patch,5,800.0,20
-Nylon Mesh,10,180.0,100
-Pocket Lining,60,25.0,300
-Shoulder Pads,100,50.0,50
-Tailoring Chalk,500,10.0,100
-Machine Oil,2,250.0,10
+Item Name,MRP,Selling Price,Discount,Cost Price,Stock
+Cotton Blue Fabric,231.0,200.0,13%,153.0,15
+Denim Raw,537.0,450.0,16%,325.0,8
+Silk Thread Red,63.0,50.0,20%,40.0,200
+Zippers YKK 8inch,15.0,12.0,20%,8.0,45
+Buttons Wood 12mm,2.0,1.5,25%,1.0,5000
+Elastic 1inch,36.0,30.0,16%,19.0,12
+Polyester Thread,54.0,45.0,16%,35.0,80
+Velcro Black,80.0,60.0,25%,41.0,25
+Lace White 2mtr,140.0,120.0,14%,74.0,300
+Rivets Copper,7.0,5.0,28%,4.0,150
+Leather Patch,1118.0,800.0,28%,557.0,5
+Nylon Mesh,240.0,180.0,25%,135.0,10
+Pocket Lining,34.0,25.0,26%,17.0,60
+Shoulder Pads,64.0,50.0,21%,31.0,100
+Tailoring Chalk,12.0,10.0,16%,7.0,500
+Machine Oil,291.0,250.0,14%,153.0,2
